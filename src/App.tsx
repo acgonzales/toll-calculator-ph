@@ -1,8 +1,8 @@
 import { CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet';
-import LocationInput from './components/location-input';
-import { TOLL_BOOTHS } from './config/constants';
 import '../node_modules/leaflet/dist/leaflet.css';
-import useLocationInput from './hooks/useLocationInput';
+import LocationInput from '@/components/location-input';
+import { TOLL_BOOTHS } from '@/config/constants';
+import useLocationInput from '@/hooks/useLocationInput';
 
 function App() {
   const origin = useLocationInput();
@@ -12,7 +12,7 @@ function App() {
     <>
       <div className="flex h-screen flex-col items-center justify-center">
         <h1 className="text-3xl font-bold">&#x1f1f5;&#x1f1ed; Toll Calculator</h1>
-        <div className="card bg-base-100 w-96 shadow-sm">
+        <div className="card bg-base-100 w-100 shadow-sm">
           <div className="card-body">
             <LocationInput
               label="Origin"
@@ -28,8 +28,8 @@ function App() {
               onChange={(e) => destination.handleChange(e.target.value)}
               selectSuggestion={(suggestion) => destination.selectSuggestion(suggestion)}
             />
-            <div className="card-actions justify-end">
-              <button className="btn btn-primary">Calculate</button>
+            <div className="card-actions">
+              <button className="btn btn-primary w-full">Calculate</button>
             </div>
           </div>
         </div>

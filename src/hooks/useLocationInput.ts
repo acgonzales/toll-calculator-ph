@@ -1,19 +1,16 @@
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-
-const getSuggestionAsync = async (query: string) => {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  return ['origin', 'destination'];
-};
+import { suggest } from '@/services/location-suggest';
+import { Suggestion } from "@/services/location-suggest/types";
 
 
 function useLocationInput(initialValue: string = '') {
   const [value, setValue] = useState<string>(initialValue);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   
   const fetchSuggestions = useDebouncedCallback(async (query: string) => {
     if (query.length > 0) {
-      const results = await getSuggestionAsync(query);
+      const results = await suggest(query);
       setSuggestions(results);
     } else {
       setSuggestions([]);

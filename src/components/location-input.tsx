@@ -1,9 +1,10 @@
+import { Suggestion } from '@/services/location-suggest/types';
 import { ChangeEvent } from 'react';
 
 type LocationInputProps = {
   label: string;
   value: string;
-  suggestions: string[];
+  suggestions: Suggestion[];
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   selectSuggestion: (value: string) => void;
 };
@@ -29,10 +30,21 @@ function LocationInput({
       </fieldset>
 
       {suggestions.length > 0 && (
-        <ul className="menu bg-base-200 absolute z-10 mt-1 max-h-64 w-full overflow-y-auto rounded-md">
-          {suggestions.map((suggestion, index) => (
-            <li key={index} onClick={() => selectSuggestion(suggestion)}>
-              <a className="hover:bg-base-300">{suggestion}</a>
+        <ul className="menu menu-vertical bg-base-200 absolute z-10 mt-1 w-full rounded-md shadow-md">
+          {suggestions.map((suggestion) => (
+            <li
+              key={suggestion.id}
+              className="hover:bg-base-300 w-full cursor-pointer rounded-md"
+              onClick={() => selectSuggestion(suggestion.name)}
+            >
+              <div className="leading-tight font-semibold hover:bg-inherit">{suggestion.name}</div>
+              {suggestion.address && (
+                <>
+                  <div className="w-full text-xs text-gray-500 hover:bg-inherit">
+                    {suggestion.address}
+                  </div>
+                </>
+              )}
             </li>
           ))}
         </ul>

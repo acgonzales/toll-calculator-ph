@@ -1,4 +1,4 @@
-import { type TollBooth } from '../types/common.types';
+import { type TollBooth } from '@/types/common.types';
 
 const TOLL_BOOTHS: TollBooth[] = [
   {

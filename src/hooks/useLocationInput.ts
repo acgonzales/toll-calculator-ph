@@ -1,37 +1,45 @@
-import { useState } from "react";
-import { useDebouncedCallback } from "use-debounce";
-import { suggest } from '@/services/location-suggest';
-import { Suggestion } from "@/services/location-suggest/types";
-
+import { useCallback, useEffect, useState } from 'react';
+import { Suggestion, Location } from '@/types/common.types';
+import { LocationService } from '@/services/location.service';
 
 function useLocationInput(initialValue: string = '') {
+  const [locationService, _] = useState<LocationService>(new LocationService());
   const [value, setValue] = useState<string>(initialValue);
+  const [location, setLocation] = useState<Location | null>(null);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-  
-  const fetchSuggestions = useDebouncedCallback(async (query: string) => {
-    if (query.length > 0) {
-      const results = await suggest(query);
-      setSuggestions(results);
-    } else {
-      setSuggestions([]);
+
+  useEffect(() => {
+    if (!location) {
+      return;
     }
-  }, 1000);
-  
+    setValue(location.name);
+    setSuggestions([]);
+  }, [location]);
+
   const handleChange = (text: string) => {
     setValue(text);
-    fetchSuggestions(text);
+    locationService.suggest(value).then((results) => setSuggestions(results));
   };
-  
-  const selectSuggestion = (suggestion: string) => {
-    setValue(suggestion);
-    setSuggestions([]);
-  };
-  
+
+  const selectSuggestion = useCallback(
+    (suggestion: Suggestion) => {
+      setValue(suggestion.name);
+
+      locationService.retrieve(suggestion).then((location) => {
+        setLocation(location);
+        setSuggestions([]);
+      });
+    },
+    [locationService],
+  );
+
   return {
     value,
+    location,
     suggestions,
     handleChange,
-    selectSuggestion
+    selectSuggestion,
+    setLocation,
   };
 }
 

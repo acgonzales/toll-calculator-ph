@@ -1,4 +1,4 @@
-import { Suggestion } from '@/services/location-suggest/types';
+import { Suggestion } from '@/types/common.types';
 import { ChangeEvent } from 'react';
 
 type LocationInputProps = {
@@ -6,7 +6,7 @@ type LocationInputProps = {
   value: string;
   suggestions: Suggestion[];
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  selectSuggestion: (value: string) => void;
+  selectSuggestion: (value: Suggestion) => void;
 };
 
 function LocationInput({
@@ -35,7 +35,7 @@ function LocationInput({
             <li
               key={suggestion.id}
               className="hover:bg-base-300 w-full cursor-pointer rounded-md"
-              onClick={() => selectSuggestion(suggestion.name)}
+              onClick={() => selectSuggestion(suggestion)}
             >
               <div className="leading-tight font-semibold hover:bg-inherit">{suggestion.name}</div>
               {suggestion.address && (

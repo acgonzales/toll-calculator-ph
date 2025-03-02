@@ -5,6 +5,7 @@ import {
   DirectionsTollCalculation,
   DirectionsTollCalculationOverviewLeg,
 } from '@/types/common.types';
+import { ExpresswayRfidMap } from '@/config/toll-matrix';
 import * as turf from '@turf/turf';
 
 interface StepTollGate {
@@ -21,12 +22,7 @@ const getStepTollGate = (
   directions.steps.forEach((step) => {
     tollGates.features.forEach((tollGate) => {
       if (tollGate.geometry.type === 'Polygon') {
-        if (
-          turf.booleanCrosses(
-            step.geometry as GeoJSON.Feature<GeoJSON.LineString>,
-            tollGate as GeoJSON.Feature<GeoJSON.Polygon>,
-          )
-        ) {
+        if (turf.booleanCrosses(step.geometry, tollGate as GeoJSON.Feature<GeoJSON.Polygon>)) {
           if (!stepTollGate.some((toll) => toll.tollGate.name === tollGate.properties?.name)) {
             stepTollGate.push({
               step,
@@ -51,6 +47,20 @@ const combineSteps = (steps: DirectionStep[]): GeoJSON.FeatureCollection => {
   );
 };
 
+const getTollPrice = (entry: TollGate, exit: TollGate): number => {
+  if (entry === exit) {
+    return 0;
+  }
+
+  const matrix = ExpresswayRfidMap[entry.expressway];
+  return matrix.matrix[entry.name][exit.name][0];
+};
+
+const getRfidType = (tollGate: TollGate): 'EasyTrip' | 'AutoSweep' => {
+  const matrix = ExpresswayRfidMap[tollGate.expressway];
+  return matrix.rfidType;
+};
+
 export const calculateToll = (
   tollGates: GeoJSON.FeatureCollection,
   directions: Directions,
@@ -61,6 +71,9 @@ export const calculateToll = (
   let currentSteps: DirectionStep[] = [];
   let currentEntry: TollGate | null = null;
   let isInTollRoad = false;
+
+  let easyTripTotal = 0;
+  let autoSweepTotal = 0;
 
   directions.steps.forEach((step) => {
     const tollGate = stepTollGate.find((toll) => toll.step.id === step.id);
@@ -104,6 +117,15 @@ export const calculateToll = (
           // Add the current step (which has the exit)
           currentSteps.push(step);
 
+          const tollPrice = getTollPrice(currentEntry, tollGate.tollGate);
+          if (tollPrice > 0) {
+            if (getRfidType(currentEntry) === 'EasyTrip') {
+              easyTripTotal += tollPrice;
+            } else {
+              autoSweepTotal += tollPrice;
+            }
+          }
+
           // Create a toll leg
           legs.push({
             type: 'toll',
@@ -111,6 +133,7 @@ export const calculateToll = (
             entry: currentEntry,
             exit: tollGate.tollGate,
             geometry: combineSteps([...currentSteps]),
+            price: tollPrice,
           });
 
           // Reset for the next section
@@ -138,13 +161,13 @@ export const calculateToll = (
   if (currentSteps.length > 0) {
     if (isInTollRoad && currentEntry) {
       // We're still in a toll road without an exit - this is an edge case
-      // You may want to handle this differently depending on your requirements
       legs.push({
         type: 'toll',
         steps: [...currentSteps],
         entry: currentEntry,
         exit: currentEntry, // No proper exit, using entry as a placeholder
         geometry: combineSteps([...currentSteps]),
+        price: getTollPrice(currentEntry, currentEntry),
       });
     } else {
       // Regular non-toll leg
@@ -159,5 +182,8 @@ export const calculateToll = (
   return {
     directions,
     overview: legs,
+    easyTripTotal,
+    autoSweepTotal,
+    total: easyTripTotal + autoSweepTotal,
   };
 };

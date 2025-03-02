@@ -14,6 +14,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import LocationMarker from '@/components/location-marker';
 import { directionStepLayer, directionTollStepLayer, tollGateLayer } from '@/styles/map.styles';
 import DirectionsOverviewTimeline from './components/directions-overview-timeline';
+import CalculationResultAmounts from './components/calculation-result-amounts';
 
 function App() {
   const origin = useLocationInput();
@@ -121,7 +122,10 @@ function App() {
                 {calculationResult && (
                   <>
                     <div className="divider"></div>
-                    <DirectionsOverviewTimeline calculation={calculationResult} />
+                    <div className="h-full overflow-y-scroll">
+                      <DirectionsOverviewTimeline calculation={calculationResult} />
+                      <CalculationResultAmounts calculation={calculationResult} />
+                    </div>
                   </>
                 )}
               </div>

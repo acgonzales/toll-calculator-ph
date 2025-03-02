@@ -29,7 +29,6 @@ export interface DirectionStep {
   name: string;
   geometry: GeoJSON.MultiLineString | GeoJSON.LineString;
 }
-
 export interface Directions {
   origin: Location;
   destination: Location;
@@ -49,6 +48,7 @@ export interface DirectionsTollCalculationOverviewLegToll {
   geometry: GeoJSON.GeoJSON;
   entry: TollGate;
   exit: TollGate;
+  price: number;
 }
 
 export type DirectionsTollCalculationOverviewLeg =
@@ -58,4 +58,20 @@ export type DirectionsTollCalculationOverviewLeg =
 export interface DirectionsTollCalculation {
   directions: Directions;
   overview: DirectionsTollCalculationOverviewLeg[];
+  easyTripTotal: number;
+  autoSweepTotal: number;
+  total: number;
+}
+
+export interface TollPriceMatrix {
+  rfidType: 'EasyTrip' | 'AutoSweep';
+  matrix: {
+    [entry: string]: {
+      [exit: string]: [number, number, number];
+    };
+  };
+}
+
+export interface ExpressWayRfidMatrix {
+  [expressway: string]: TollPriceMatrix;
 }

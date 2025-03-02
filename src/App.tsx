@@ -84,18 +84,16 @@ function App() {
       const directions = await getDirectionsApi(origin.location, destination.location);
       const result = calculateToll(tollGates, directions);
       setCalculationResult(result);
-      console.log(result);
     }
   }, [tollGates, origin.location, destination.location]);
 
   return (
     <>
-      <div className="flex h-screen flex-col items-center justify-center">
-        <h1 className="text-3xl font-bold">&#x1f1f5;&#x1f1ed; Toll Calculator</h1>
-        <div className="card bg-base-200 min-h-10/12 w-6xl shadow-md">
-          <div className="card-body">
-            <div className="flex h-full flex-col justify-stretch gap-4 lg:flex-row">
-              <div className="flex w-full flex-col gap-2">
+      <div className="h-screen w-screen p-2 md:p-6">
+        <div className="mockup-window border-base-300 h-full w-full border">
+          <div className="grid h-full grid-cols-1 grid-rows-2 gap-4 overflow-auto p-4 md:grid-cols-3 md:grid-rows-1 md:gap-6 md:p-6">
+            <div className="order-2 col-span-1 row-span-1 md:order-1 md:row-start-1">
+              <div className="flex h-full w-full flex-col gap-2">
                 <LocationInput
                   label="Origin"
                   value={origin.value}
@@ -122,47 +120,45 @@ function App() {
                 {calculationResult && (
                   <>
                     <div className="divider"></div>
-                    <div className="h-full overflow-y-scroll">
+                    <div className="flex h-full flex-col justify-between">
                       <DirectionsOverviewTimeline calculation={calculationResult} />
                       <CalculationResultAmounts calculation={calculationResult} />
                     </div>
                   </>
                 )}
               </div>
-              <div className="w-full">
-                <Map
-                  ref={mapRef}
-                  mapboxAccessToken={env.MAPBOX_API_KEY}
-                  mapStyle="mapbox://styles/mapbox/streets-v9"
-                >
-                  {origin.location && <LocationMarker location={origin.location} />}
-                  {destination.location && <LocationMarker location={destination.location} />}
+            </div>
 
-                  {calculationResult &&
-                    calculationResult.overview
-                      .filter((leg) => leg.type === 'toll')
-                      .map((leg) => (
-                        <Source type="geojson" data={leg.geometry}>
-                          <Layer {...directionTollStepLayer} />
-                        </Source>
-                      ))}
-
-                  {calculationResult &&
-                    calculationResult.overview
-                      .filter((leg) => leg.type === 'regular')
-                      .map((leg) => (
-                        <Source type="geojson" data={leg.geometry}>
-                          <Layer {...directionStepLayer} />
-                        </Source>
-                      ))}
-
-                  {tollGates && (
-                    <Source type="geojson" data={tollGates}>
-                      <Layer {...tollGateLayer} />
-                    </Source>
-                  )}
-                </Map>
-              </div>
+            <div className="order-1 col-span-1 row-span-1 h-64 md:order-2 md:col-span-2 md:col-start-2 md:row-start-1 md:h-full">
+              <Map
+                ref={mapRef}
+                mapboxAccessToken={env.MAPBOX_API_KEY}
+                mapStyle="mapbox://styles/mapbox/streets-v9"
+              >
+                {origin.location && <LocationMarker location={origin.location} />}
+                {destination.location && <LocationMarker location={destination.location} />}
+                {calculationResult &&
+                  calculationResult.overview
+                    .filter((leg) => leg.type === 'toll')
+                    .map((leg, index) => (
+                      <Source key={`toll-${index}`} type="geojson" data={leg.geometry}>
+                        <Layer {...directionTollStepLayer} />
+                      </Source>
+                    ))}
+                {calculationResult &&
+                  calculationResult.overview
+                    .filter((leg) => leg.type === 'regular')
+                    .map((leg, index) => (
+                      <Source key={`regular-${index}`} type="geojson" data={leg.geometry}>
+                        <Layer {...directionStepLayer} />
+                      </Source>
+                    ))}
+                {tollGates && (
+                  <Source type="geojson" data={tollGates}>
+                    <Layer {...tollGateLayer} />
+                  </Source>
+                )}
+              </Map>
             </div>
           </div>
         </div>

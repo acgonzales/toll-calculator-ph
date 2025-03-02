@@ -1,15 +1,15 @@
 import { Suggestion } from '@/types/common.types';
 import { ChangeEvent } from 'react';
 
-type LocationInputProps = {
+interface LocationInputProps {
   label: string;
   value: string;
   suggestions: Suggestion[];
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   selectSuggestion: (value: Suggestion) => void;
-};
+}
 
-function LocationInput({
+export default function LocationInput({
   label,
   value,
   onChange,
@@ -52,5 +52,3 @@ function LocationInput({
     </div>
   );
 }
-
-export default LocationInput;

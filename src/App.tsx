@@ -1,17 +1,30 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import LocationInput from '@/components/location-input';
 import useLocationInput from '@/hooks/useLocationInput';
-import { reverse } from '@/services/location.service';
-import Map, { Marker, MapRef } from 'react-map-gl/mapbox';
+import {
+  getLocationFromCoordinates,
+  getDirections as getDirectionsApi,
+} from '@/services/location.service';
+import Map, { Layer, LayerProps, MapRef, Source } from 'react-map-gl/mapbox';
 import env from '@/config/env';
-import { MapPinIcon } from '@heroicons/react/24/solid';
 import { getCenter, getMapBounds } from '@/util/map.util';
-
+import { Directions } from '@/types/common.types';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import LocationMarker from './components/location-marker';
+import DirectionsTimeline from './components/directions-timeline';
+
+const directionStepLayer: LayerProps = {
+  type: 'line',
+  paint: {
+    'line-color': '#ff0000',
+    'line-width': 3,
+  },
+};
 
 function App() {
   const origin = useLocationInput();
   const destination = useLocationInput();
+  const [directions, setDirections] = useState<Directions | null>(null);
 
   const mapRef = useRef<MapRef>(null);
 
@@ -22,7 +35,7 @@ function App() {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
         };
-        const location = await reverse(coords);
+        const location = await getLocationFromCoordinates(coords);
         if (location) {
           origin.setLocation(location);
           mapRef.current?.flyTo({
@@ -38,7 +51,6 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // Get the center and appropriate zoom level for the map
     if (origin.location && destination.location) {
       const center = getCenter(origin.location.coordinates, destination.location.coordinates);
 
@@ -52,12 +64,23 @@ function App() {
         getMapBounds(origin.location.coordinates, destination.location.coordinates),
         {
           linear: false,
-          padding: 50,
+          padding: 80,
           maxZoom: 15,
         },
       );
     }
   }, [mapRef.current, origin.location, destination.location]);
+
+  useEffect(() => {
+    setDirections(null);
+  }, [origin.location, destination.location]);
+
+  const getDirections = useCallback(async () => {
+    if (origin.location && destination.location) {
+      const directions = await getDirectionsApi(origin.location, destination.location);
+      setDirections(directions);
+    }
+  }, [origin.location, destination.location]);
 
   return (
     <>
@@ -82,8 +105,19 @@ function App() {
                   selectSuggestion={(suggestion) => destination.selectSuggestion(suggestion)}
                 />
                 <div className="card-actions">
-                  <button className="btn btn-primary w-full">Calculate</button>
+                  <button
+                    disabled={!origin.location || !destination.location}
+                    onClick={getDirections}
+                    className="btn btn-primary w-full"
+                  >
+                    Calculate
+                  </button>
                 </div>
+                {/* {directions && (
+                  <div className="divider">
+                    <DirectionsTimeline directions={directions} />
+                  </div>
+                )} */}
               </div>
               <div className="w-full">
                 <Map
@@ -91,23 +125,14 @@ function App() {
                   mapboxAccessToken={env.MAPBOX_API_KEY}
                   mapStyle="mapbox://styles/mapbox/streets-v9"
                 >
-                  {origin.location && (
-                    <Marker
-                      latitude={origin.location.coordinates.latitude}
-                      longitude={origin.location.coordinates.longitude}
-                    >
-                      <MapPinIcon className="size-10 cursor-pointer text-red-500 hover:text-red-700" />
-                    </Marker>
-                  )}
+                  {origin.location && <LocationMarker location={origin.location} />}
+                  {destination.location && <LocationMarker location={destination.location} />}
 
-                  {destination.location && (
-                    <Marker
-                      latitude={destination.location.coordinates.latitude}
-                      longitude={destination.location.coordinates.longitude}
-                    >
-                      <MapPinIcon className="size-10 cursor-pointer text-red-500 hover:text-red-700" />
-                    </Marker>
-                  )}
+                  {directions?.steps.map((step) => (
+                    <Source type="geojson" data={step.geometry}>
+                      <Layer {...directionStepLayer} />
+                    </Source>
+                  ))}
                 </Map>
               </div>
             </div>

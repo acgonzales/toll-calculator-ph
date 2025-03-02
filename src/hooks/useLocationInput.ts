@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Suggestion, Location } from '@/types/common.types';
-import { LocationService } from '@/services/location.service';
+import {
+  createSession,
+  getLocationFromSuggestion,
+  getSuggestions,
+} from '@/services/location.service';
 
 function useLocationInput(initialValue: string = '') {
-  const [locationService, _] = useState<LocationService>(new LocationService());
+  const [session] = useState(createSession());
   const [value, setValue] = useState<string>(initialValue);
   const [location, setLocation] = useState<Location | null>(null);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -18,19 +22,19 @@ function useLocationInput(initialValue: string = '') {
 
   const handleChange = (text: string) => {
     setValue(text);
-    locationService.suggest(value).then((results) => setSuggestions(results));
+    getSuggestions(session, text).then((results) => setSuggestions(results));
   };
 
   const selectSuggestion = useCallback(
     (suggestion: Suggestion) => {
       setValue(suggestion.name);
 
-      locationService.retrieve(suggestion).then((location) => {
+      getLocationFromSuggestion(session, suggestion).then((location) => {
         setLocation(location);
         setSuggestions([]);
       });
     },
-    [locationService],
+    [session],
   );
 
   return {

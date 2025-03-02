@@ -74,12 +74,9 @@ export const getDirections = async (
     origin,
     destination,
     geometry: route.geometry,
-    steps: leg.steps.map((step) => ({
+    steps: leg.steps.map((step, index) => ({
+      id: index.toString(),
       name: step.name,
-      coordinates: {
-        longitude: step.maneuver.location[0],
-        latitude: step.maneuver.location[1],
-      },
       geometry: step.geometry,
     })),
   };

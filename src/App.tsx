@@ -5,26 +5,23 @@ import {
   getLocationFromCoordinates,
   getDirections as getDirectionsApi,
 } from '@/services/location.service';
-import Map, { Layer, LayerProps, MapRef, Source } from 'react-map-gl/mapbox';
+import { calculateToll } from '@/services/toll.service';
+import Map, { Layer, MapRef, Source } from 'react-map-gl/mapbox';
 import env from '@/config/env';
 import { getCenter, getMapBounds } from '@/util/map.util';
-import { Directions } from '@/types/common.types';
+import { DirectionsTollCalculation } from '@/types/common.types';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import LocationMarker from './components/location-marker';
-import DirectionsTimeline from './components/directions-timeline';
-
-const directionStepLayer: LayerProps = {
-  type: 'line',
-  paint: {
-    'line-color': '#ff0000',
-    'line-width': 3,
-  },
-};
+import LocationMarker from '@/components/location-marker';
+import { directionStepLayer, directionTollStepLayer, tollGateLayer } from '@/styles/map.styles';
+import DirectionsOverviewTimeline from './components/directions-overview-timeline';
 
 function App() {
   const origin = useLocationInput();
   const destination = useLocationInput();
-  const [directions, setDirections] = useState<Directions | null>(null);
+  const [tollGates, setTollGates] = useState<GeoJSON.FeatureCollection | null>(null);
+  const [calculationResult, setCalculationResult] = useState<DirectionsTollCalculation | null>(
+    null,
+  );
 
   const mapRef = useRef<MapRef>(null);
 
@@ -48,6 +45,12 @@ function App() {
         }
       });
     }
+
+    fetch('/toll-gates.geojson')
+      .then((response) => response.json())
+      .then((data) => {
+        setTollGates(data);
+      });
   }, []);
 
   useEffect(() => {
@@ -72,21 +75,23 @@ function App() {
   }, [mapRef.current, origin.location, destination.location]);
 
   useEffect(() => {
-    setDirections(null);
+    setCalculationResult(null);
   }, [origin.location, destination.location]);
 
   const getDirections = useCallback(async () => {
-    if (origin.location && destination.location) {
+    if (tollGates && origin.location && destination.location) {
       const directions = await getDirectionsApi(origin.location, destination.location);
-      setDirections(directions);
+      const result = calculateToll(tollGates, directions);
+      setCalculationResult(result);
+      console.log(result);
     }
-  }, [origin.location, destination.location]);
+  }, [tollGates, origin.location, destination.location]);
 
   return (
     <>
       <div className="flex h-screen flex-col items-center justify-center">
         <h1 className="text-3xl font-bold">&#x1f1f5;&#x1f1ed; Toll Calculator</h1>
-        <div className="card bg-base-200 min-h-10/12 w-5xl shadow-md">
+        <div className="card bg-base-200 min-h-10/12 w-6xl shadow-md">
           <div className="card-body">
             <div className="flex h-full flex-col justify-stretch gap-4 lg:flex-row">
               <div className="flex w-full flex-col gap-2">
@@ -113,11 +118,12 @@ function App() {
                     Calculate
                   </button>
                 </div>
-                {/* {directions && (
-                  <div className="divider">
-                    <DirectionsTimeline directions={directions} />
-                  </div>
-                )} */}
+                {calculationResult && (
+                  <>
+                    <div className="divider"></div>
+                    <DirectionsOverviewTimeline calculation={calculationResult} />
+                  </>
+                )}
               </div>
               <div className="w-full">
                 <Map
@@ -128,11 +134,29 @@ function App() {
                   {origin.location && <LocationMarker location={origin.location} />}
                   {destination.location && <LocationMarker location={destination.location} />}
 
-                  {directions?.steps.map((step) => (
-                    <Source type="geojson" data={step.geometry}>
-                      <Layer {...directionStepLayer} />
+                  {calculationResult &&
+                    calculationResult.overview
+                      .filter((leg) => leg.type === 'toll')
+                      .map((leg) => (
+                        <Source type="geojson" data={leg.geometry}>
+                          <Layer {...directionTollStepLayer} />
+                        </Source>
+                      ))}
+
+                  {calculationResult &&
+                    calculationResult.overview
+                      .filter((leg) => leg.type === 'regular')
+                      .map((leg) => (
+                        <Source type="geojson" data={leg.geometry}>
+                          <Layer {...directionStepLayer} />
+                        </Source>
+                      ))}
+
+                  {tollGates && (
+                    <Source type="geojson" data={tollGates}>
+                      <Layer {...tollGateLayer} />
                     </Source>
-                  ))}
+                  )}
                 </Map>
               </div>
             </div>

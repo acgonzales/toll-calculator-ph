@@ -3,11 +3,10 @@ export interface Coordinates {
   longitude: number;
 }
 
-export interface TollBooth {
+export interface TollGate {
   name: string;
   type: 'entry' | 'exit';
-  rfidType: 'EasyTrip' | 'AutoSweep';
-  coordinates: Coordinates;
+  expressway: 'NLEX' | 'Skyway';
 }
 
 export interface Suggestion {
@@ -26,9 +25,9 @@ export interface Location {
 }
 
 export interface DirectionStep {
+  id: string;
   name: string;
-  coordinates: Coordinates;
-  geometry: GeoJSON.GeoJSON;
+  geometry: GeoJSON.MultiLineString | GeoJSON.LineString;
 }
 
 export interface Directions {
@@ -36,4 +35,27 @@ export interface Directions {
   destination: Location;
   steps: DirectionStep[];
   geometry: GeoJSON.GeoJSON;
+}
+
+export interface DirectionsTollCalculationOverviewLegRegular {
+  type: 'regular';
+  steps: DirectionStep[];
+  geometry: GeoJSON.GeoJSON;
+}
+
+export interface DirectionsTollCalculationOverviewLegToll {
+  type: 'toll';
+  steps: DirectionStep[];
+  geometry: GeoJSON.GeoJSON;
+  entry: TollGate;
+  exit: TollGate;
+}
+
+export type DirectionsTollCalculationOverviewLeg =
+  | DirectionsTollCalculationOverviewLegRegular
+  | DirectionsTollCalculationOverviewLegToll;
+
+export interface DirectionsTollCalculation {
+  directions: Directions;
+  overview: DirectionsTollCalculationOverviewLeg[];
 }

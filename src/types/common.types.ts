@@ -1,3 +1,5 @@
+import { SearchBoxSuggestion } from '@mapbox/search-js-core';
+
 export interface Coordinates {
   latitude: number;
   longitude: number;
@@ -13,7 +15,7 @@ export interface Suggestion {
   id: string;
   name: string;
   address: string;
-  _mbSuggestion: any; // TODO: Fully use mb suggestion type
+  _mbSuggestion: SearchBoxSuggestion; // TODO: Fully use mb suggestion type
 }
 
 export interface Location {

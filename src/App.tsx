@@ -13,9 +13,9 @@ import { DirectionsTollCalculation } from '@/types/common.types';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import LocationMarker from '@/components/location-marker';
 import { directionStepLayer, directionTollStepLayer, tollGateLayer } from '@/styles/map.styles';
-import DirectionsOverviewTimeline from './components/directions-overview-timeline';
-import CalculationResultAmounts from './components/calculation-result-amounts';
-import { asset } from './util/asset.util';
+import DirectionsOverviewTimeline from '@/components/directions-overview-timeline';
+import CalculationResultAmounts from '@/components/calculation-result-amounts';
+import { asset } from '@/util/asset.util';
 
 function App() {
   const origin = useLocationInput();
@@ -74,7 +74,7 @@ function App() {
         },
       );
     }
-  }, [mapRef.current, origin.location, destination.location]);
+  }, [origin.location, destination.location]);
 
   useEffect(() => {
     setCalculationResult(null);

@@ -15,6 +15,7 @@ import LocationMarker from '@/components/location-marker';
 import { directionStepLayer, directionTollStepLayer, tollGateLayer } from '@/styles/map.styles';
 import DirectionsOverviewTimeline from './components/directions-overview-timeline';
 import CalculationResultAmounts from './components/calculation-result-amounts';
+import { asset } from './util/asset.util';
 
 function App() {
   const origin = useLocationInput();
@@ -47,7 +48,7 @@ function App() {
       });
     }
 
-    fetch('/toll-gates.geojson')
+    fetch(asset('toll-gates.geojson'))
       .then((response) => response.json())
       .then((data) => {
         setTollGates(data);

@@ -6,7 +6,14 @@ import {
   getDirections as getDirectionsApi,
 } from '@/services/location.service';
 import { calculateToll } from '@/services/toll.service';
-import Map, { Layer, MapRef, Source } from 'react-map-gl/mapbox';
+import Map, {
+  FullscreenControl,
+  GeolocateControl,
+  Layer,
+  MapRef,
+  NavigationControl,
+  Source,
+} from 'react-map-gl/mapbox';
 import env from '@/config/env';
 import { getCenter, getMapBounds } from '@/util/map.util';
 import { DirectionsTollCalculation } from '@/types/common.types';
@@ -28,6 +35,7 @@ function App() {
   const mapRef = useRef<MapRef>(null);
 
   useEffect(() => {
+    // TODO: Use GeolocateControl instead of navigator.geolocation
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(async (position) => {
         const coords = {
@@ -53,7 +61,7 @@ function App() {
       .then((data) => {
         setTollGates(data);
       });
-  }, []);
+  }, [origin]);
 
   useEffect(() => {
     if (origin.location && destination.location) {
@@ -136,6 +144,10 @@ function App() {
                 mapboxAccessToken={env.MAPBOX_API_KEY}
                 mapStyle="mapbox://styles/mapbox/streets-v9"
               >
+                <GeolocateControl />
+                <FullscreenControl />
+                <NavigationControl />
+
                 {origin.location && <LocationMarker location={origin.location} />}
                 {destination.location && <LocationMarker location={destination.location} />}
                 {calculationResult &&

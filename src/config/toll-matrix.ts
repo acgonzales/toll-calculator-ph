@@ -1,7 +1,7 @@
-import { TollPriceMatrix, ExpressWayRfidMatrix } from '@/types/common.types';
+import { TollPriceMatrixEntry, TollPriceMatrix, ExpressWayRfidMatrix } from '@/types/common.types';
+import nlexSctexTollMatrix from '@/data/nlex-sctex-toll-matrix.json';
 
-// TODO: Complete toll matrix
-
+// TODO: Autosweep Toll Matrix
 export const AutoSweepMatrix: TollPriceMatrix = {
   rfidType: 'AutoSweep',
   matrix: {},
@@ -9,18 +9,7 @@ export const AutoSweepMatrix: TollPriceMatrix = {
 
 export const EasyTripMatrix: TollPriceMatrix = {
   rfidType: 'EasyTrip',
-  matrix: {
-    Mexico: {
-      'San Fernando': [37, 92, 110],
-      Angeles: [44, 201, 242],
-      Dau: [54, 228, 274],
-    },
-    'San Fernando': {
-      Mexico: [37, 92, 110],
-      Angeles: [81, 201, 242],
-      Dau: [91, 228, 274],
-    },
-  },
+  matrix: nlexSctexTollMatrix as unknown as TollPriceMatrixEntry,
 };
 
 export const ExpresswayRfidMap: ExpressWayRfidMatrix = {

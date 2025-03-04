@@ -8,6 +8,7 @@ export interface Coordinates {
 export interface TollGate {
   name: string;
   type: 'entry' | 'exit';
+  bound: 'Northbound' | 'Southbound';
   expressway: 'NLEX' | 'Skyway';
 }
 
@@ -65,13 +66,15 @@ export interface DirectionsTollCalculation {
   total: number;
 }
 
+export interface TollPriceMatrixEntry {
+  [entry: string]: {
+    [exit: string]: [number, number, number]; // [class1, class2, class3]
+  };
+}
+
 export interface TollPriceMatrix {
   rfidType: 'EasyTrip' | 'AutoSweep';
-  matrix: {
-    [entry: string]: {
-      [exit: string]: [number, number, number];
-    };
-  };
+  matrix: TollPriceMatrixEntry;
 }
 
 export interface ExpressWayRfidMatrix {

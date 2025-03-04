@@ -61,7 +61,7 @@ function App() {
       .then((data) => {
         setTollGates(data);
       });
-  }, [origin]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (origin.location && destination.location) {

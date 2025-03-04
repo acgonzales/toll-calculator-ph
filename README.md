@@ -6,6 +6,9 @@ Website: https://acgonzales.github.io/toll-calculator-ph/
 
 ## TODO
 
+- [ ] Add more toll gates (NLEX, SCTEX, Skyway, etc.)
+- [ ] Error handling
+- [ ] Tests
+- [ ] Multi-route directions
 - [ ] Rate limiting
-- [ ] Loading states
-- [ ] Add more toll gates (NLEX, Skyway, etc.)
+- [ ] UI Improvements (layout, loading states, etc.)

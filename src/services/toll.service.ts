@@ -30,6 +30,7 @@ const getStepTollGate = (
                 name: tollGate.properties?.name,
                 type: tollGate.properties?.type,
                 expressway: tollGate.properties?.expressway,
+                bound: tollGate.properties?.bound,
               },
             });
           }
@@ -82,6 +83,7 @@ export const calculateToll = (
     if (tollGate) {
       const isTollEntry = tollGate.tollGate.type === 'entry';
       const isTollExit = tollGate.tollGate.type === 'exit';
+      const tollBound = tollGate.tollGate.bound;
 
       // Found an entry toll gate
       if (isTollEntry) {
@@ -114,6 +116,12 @@ export const calculateToll = (
       else if (isTollExit) {
         // If we're in a toll road, we've found a matching exit
         if (isInTollRoad && currentEntry) {
+          // If the exit bound is different than the entry bound, we're in a different bound
+          if (currentEntry.bound !== tollBound) {
+            // TODO: Handle appropriately
+            console.warn('Exit bound is different than entry bound.');
+          }
+
           // Add the current step (which has the exit)
           currentSteps.push(step);
 

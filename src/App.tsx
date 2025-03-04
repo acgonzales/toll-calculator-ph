@@ -82,9 +82,7 @@ function App() {
         },
       );
     }
-  }, [origin.location, destination.location]);
 
-  useEffect(() => {
     setCalculationResult(null);
   }, [origin.location, destination.location]);
 

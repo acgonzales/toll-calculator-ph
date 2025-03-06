@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Suggestion, Location } from '@/types/common.types';
+import { Location } from '@/types/common.types';
 import {
   createSession,
   getLocationFromSuggestion,
   getSuggestions,
 } from '@/services/location.service';
+import { SearchBoxSuggestion } from '@mapbox/search-js-core';
 
 function useLocationInput(initialValue: string = '') {
   const [session] = useState(createSession());
   const [value, setValue] = useState<string>(initialValue);
   const [location, setLocation] = useState<Location | null>(null);
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [suggestions, setSuggestions] = useState<SearchBoxSuggestion[]>([]);
 
   useEffect(() => {
     if (!location) {
@@ -26,7 +27,7 @@ function useLocationInput(initialValue: string = '') {
   };
 
   const selectSuggestion = useCallback(
-    (suggestion: Suggestion) => {
+    (suggestion: SearchBoxSuggestion) => {
       setValue(suggestion.name);
 
       getLocationFromSuggestion(session, suggestion).then((location) => {

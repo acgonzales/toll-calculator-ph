@@ -1,5 +1,3 @@
-import { SearchBoxSuggestion } from '@mapbox/search-js-core';
-
 export interface Coordinates {
   latitude: number;
   longitude: number;
@@ -10,13 +8,6 @@ export interface TollGate {
   type: 'entry' | 'exit';
   bound: 'Northbound' | 'Southbound';
   expressway: 'NLEX' | 'Skyway';
-}
-
-export interface Suggestion {
-  id: string;
-  name: string;
-  address: string;
-  _mbSuggestion: SearchBoxSuggestion; // TODO: Fully use mb suggestion type
 }
 
 export interface Location {

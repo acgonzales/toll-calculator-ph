@@ -1,5 +1,5 @@
 import env from '@/config/env';
-import { Coordinates, Suggestion, Location, Directions } from '@/types/common.types';
+import { Coordinates, Location, Directions } from '@/types/common.types';
 import {
   SearchBoxCore,
   SearchSession,
@@ -96,24 +96,19 @@ export const createSession = (): SearchBoxSearchSession => {
 export const getSuggestions = async (
   searchSession: SearchBoxSearchSession,
   query: string,
-): Promise<Suggestion[]> => {
+): Promise<SearchBoxSuggestion[]> => {
   const response = await searchSession.suggest(query, {
     limit: 3,
     country: 'ph',
   });
-  return response.suggestions.map((suggestion) => ({
-    id: suggestion.mapbox_id,
-    name: suggestion.name,
-    address: suggestion.full_address,
-    _mbSuggestion: suggestion,
-  }));
+  return response.suggestions;
 };
 
 export const getLocationFromSuggestion = async (
   searchSession: SearchBoxSearchSession,
-  suggestion: Suggestion,
+  suggestion: SearchBoxSuggestion,
 ): Promise<Location | null> => {
-  const response = await searchSession.retrieve(suggestion._mbSuggestion, {
+  const response = await searchSession.retrieve(suggestion, {
     country: 'ph',
   });
 

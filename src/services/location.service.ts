@@ -82,7 +82,7 @@ export const getDirections = async (
   };
 };
 
-type SearchBoxSearchSession = SearchSession<
+export type SearchBoxSearchSession = SearchSession<
   SearchBoxOptions,
   SearchBoxSuggestion,
   SearchBoxSuggestionResponse,
@@ -90,7 +90,7 @@ type SearchBoxSearchSession = SearchSession<
 >;
 
 export const createSession = (): SearchBoxSearchSession => {
-  return new SearchSession(searchBoxCore, 1000);
+  return new SearchSession(searchBoxCore);
 };
 
 export const getSuggestions = async (
@@ -98,7 +98,7 @@ export const getSuggestions = async (
   query: string,
 ): Promise<SearchBoxSuggestion[]> => {
   const response = await searchSession.suggest(query, {
-    limit: 3,
+    limit: 5,
     country: 'ph',
   });
   return response.suggestions;

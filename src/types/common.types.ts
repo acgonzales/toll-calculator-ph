@@ -18,6 +18,12 @@ export interface Location {
   feature: GeoJSON.GeoJSON;
 }
 
+export interface LocationInterim {
+  id: string;
+  text?: string;
+  location?: Location;
+}
+
 export interface DirectionStep {
   id: string;
   name: string;

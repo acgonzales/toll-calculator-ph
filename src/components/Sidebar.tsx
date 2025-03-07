@@ -9,7 +9,7 @@ export default function Sidebar({ children, className }: SidebarProps) {
     <div
       className={twMerge(
         className,
-        'bg-base-100 shadow-base-300 rounded-t-box lg:rounded-r-box flex flex-col py-4 shadow-md lg:rounded-t-none',
+        'bg-base-100 shadow-base-300 rounded-t-box flex flex-col pt-8 shadow-md lg:rounded-t-none lg:rounded-r-3xl',
       )}
     >
       {children}

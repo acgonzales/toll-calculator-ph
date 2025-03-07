@@ -1,5 +1,5 @@
 import LocationItem from '@/components/LocationItem';
-import { useSearch } from '@/contexts/SearchContext';
+import { useSearch } from '@/stores/search/hooks';
 import { useDebouncedCallback } from 'use-debounce';
 
 export default function LocationControl() {

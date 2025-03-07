@@ -3,14 +3,15 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import LocationControl from '@/features/LocationControl';
 import Sidebar from '@/components/Sidebar';
 import SearchResults from '@/components/SearchResults';
-import { useSearch } from '@/stores/search/hooks';
+import { useSearch, useLocation } from '@/stores';
 import { useSearchSuggestionsQuery } from '@/queries/useSearchSuggestionsQuery';
 import { useRetrieveSuggestionQuery } from '@/queries/useRetrieveSuggestionQuery';
 import MapView from '@/features/MapView';
 
 function App() {
-  const { searchId, searchQuery, setActiveSuggestion, setInterimLocation, resetSession } =
-    useSearch();
+  const { setInterimLocation } = useLocation();
+
+  const { searchId, searchQuery, setActiveSuggestion, resetSession } = useSearch();
   const { data: suggestions, isLoading: isSearching } = useSearchSuggestionsQuery();
   const { data: retrievedLocation, isSuccess: retrieveSuccess } = useRetrieveSuggestionQuery();
 

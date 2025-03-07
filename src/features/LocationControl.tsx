@@ -1,22 +1,25 @@
 import LocationItem from '@/components/LocationItem';
-import { useSearch } from '@/stores/search/hooks';
+import { useSearch, useLocation } from '@/stores';
 import { useDebouncedCallback } from 'use-debounce';
+import { LocationColors } from '@/config/colors';
 
 export default function LocationControl() {
-  const { locationInterims, addInterim, removeInterim, setSearchQuery } = useSearch();
+  const { interims, addInterim, removeInterim } = useLocation();
+  const { setSearchQuery } = useSearch();
 
   const onChange = useDebouncedCallback((id: string, text: string) => {
     setSearchQuery(id, text);
   }, 1000);
 
-  const canDelete = locationInterims.length > 2;
+  const canDelete = interims.length > 2;
 
   return (
     <div className="flex flex-col gap-2 px-4">
       <ul className="list">
-        {locationInterims.map((interim, index) => (
+        {interims.map((interim, index) => (
           <LocationItem
             key={interim.id}
+            color={LocationColors[index]}
             interim={interim}
             isOrigin={index == 0}
             onQueryChange={onChange}
@@ -25,9 +28,11 @@ export default function LocationControl() {
           />
         ))}
       </ul>
-      <button className="btn btn-outline btn-secondary" onClick={addInterim}>
-        Add another destination
-      </button>
+      {interims.length < 5 && (
+        <button className="btn btn-outline btn-secondary" onClick={addInterim}>
+          Add another destination
+        </button>
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { LocationInterim } from '@/types/common.types';
 
 interface UseLocationSearchProps {
@@ -7,19 +7,26 @@ interface UseLocationSearchProps {
 }
 
 export function useLocationSearch({ interim, onQueryChange }: UseLocationSearchProps) {
+  const [inputValue, setInputValue] = useState<string>('');
+
+  useEffect(() => {
+    setInputValue(interim.location?.name ?? interim.text ?? '');
+  }, [interim.location, interim.text]);
+
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      onQueryChange(interim.id, e.target.value);
+      const newValue = e.target.value;
+      setInputValue(newValue);
+      onQueryChange(interim.id, newValue);
     },
     [interim.id, onQueryChange],
   );
 
-  const displayValue = interim.location?.name ?? interim.text;
   const isRealized = !!interim.location;
 
   return {
     handleChange,
-    displayValue,
+    inputValue,
     isRealized,
   };
 }

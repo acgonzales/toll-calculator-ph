@@ -1,23 +1,26 @@
 import { createContext, useReducer } from 'react';
 import { SearchBoxSuggestion } from '@mapbox/search-js-core';
-import { Location } from '@/types/common.types';
 import { SearchContextState } from '@/stores/search/types';
 import { searchReducer, initialState } from '@/stores/search/reducer';
 import { searchActions } from '@/stores/search/actions';
+import { useLocation } from '@/stores/location/hooks';
 
 export const SearchContext = createContext<SearchContextState | undefined>(undefined);
 export const SearchProvider = ({ children }: { children: React.ReactNode }) => {
+  const locationContext = useLocation();
   const [state, dispatch] = useReducer(searchReducer, initialState);
+
+  const setSearchQuery = (searchId: string, query: string) => {
+    const interim = locationContext.interims.find((i) => i.id === searchId);
+    if (interim) {
+      dispatch(searchActions.setSearchQuery(searchId, query));
+    }
+  };
 
   const contextValue = {
     ...state,
-    setSearchQuery: (searchId: string, query: string) =>
-      dispatch(searchActions.setSearchQuery(searchId, query)),
+    setSearchQuery,
     resetSession: () => dispatch(searchActions.resetSession()),
-    addInterim: () => dispatch(searchActions.addInterim()),
-    removeInterim: (id: string) => dispatch(searchActions.removeInterim(id)),
-    setInterimLocation: (id: string, location: Location) =>
-      dispatch(searchActions.setInterimLocation(id, location)),
     setActiveSuggestion: (suggestion: SearchBoxSuggestion | undefined) =>
       dispatch(searchActions.setActiveSuggestion(suggestion)),
   };

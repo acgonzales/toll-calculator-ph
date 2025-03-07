@@ -9,6 +9,8 @@ export default function LocationControl() {
     setSearchQuery(id, text);
   }, 1000);
 
+  const canDelete = locationInterims.length > 2;
+
   return (
     <div className="flex flex-col gap-2 px-4">
       <ul className="list">
@@ -19,6 +21,7 @@ export default function LocationControl() {
             isOrigin={index == 0}
             onQueryChange={onChange}
             onRemoveItem={removeInterim}
+            canDelete={canDelete}
           />
         ))}
       </ul>

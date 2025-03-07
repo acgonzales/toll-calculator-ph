@@ -6,10 +6,12 @@ import {
   MapPinIcon,
 } from '@heroicons/react/24/outline';
 import { twMerge } from 'tailwind-merge';
+import clsx from 'clsx';
 
 interface LocationItemProps extends React.ComponentPropsWithoutRef<'li'> {
   interim: LocationInterim;
   isOrigin: boolean;
+  canDelete: boolean;
   onQueryChange: (id: string, text: string) => void;
   onRemoveItem: (id: string) => void;
 }
@@ -18,6 +20,7 @@ export default function LocationItem({
   isOrigin,
   className,
   interim,
+  canDelete,
   onQueryChange,
   onRemoveItem,
 }: LocationItemProps) {
@@ -38,9 +41,18 @@ export default function LocationItem({
           />
         </label>
       </div>
-      <div className="tooltip tooltip-bottom flex items-center" data-tip="Remove location">
-        <button className="btn btn-square btn-ghost" onClick={() => onRemoveItem(interim.id)}>
-          <XCircleIcon className="text-error size-6" />
+      <div
+        className={clsx('flex items-center', canDelete && 'tooltip tooltip-bottom')}
+        data-tip="Remove location"
+      >
+        <button
+          disabled={!canDelete}
+          className="btn btn-square btn-ghost"
+          onClick={() => onRemoveItem(interim.id)}
+        >
+          <XCircleIcon
+            className={clsx('size-6', 'transition-all', canDelete ? 'text-error' : 'text-gray-700')}
+          />
         </button>
       </div>
     </li>

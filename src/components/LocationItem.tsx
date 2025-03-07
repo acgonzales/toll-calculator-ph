@@ -7,6 +7,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { twMerge } from 'tailwind-merge';
 import clsx from 'clsx';
+import { useLocationSearch } from '@/hooks/useLocationSearch';
 
 interface LocationItemProps extends React.ComponentPropsWithoutRef<'li'> {
   interim: LocationInterim;
@@ -24,10 +25,21 @@ export default function LocationItem({
   onQueryChange,
   onRemoveItem,
 }: LocationItemProps) {
+  const { handleChange, displayValue, isRealized } = useLocationSearch({
+    interim,
+    onQueryChange,
+  });
+
+  const leadingIconCls = clsx('size-6', isRealized && 'text-success');
+
   return (
     <li className={twMerge(className, 'list-row p-1')}>
       <div className="flex items-center">
-        {isOrigin ? <HomeIcon className="size-6" /> : <MapPinIcon className="size-6" />}
+        {isOrigin ? (
+          <HomeIcon className={leadingIconCls} />
+        ) : (
+          <MapPinIcon className={leadingIconCls} />
+        )}
       </div>
       <div>
         <label className="input w-full">
@@ -36,8 +48,8 @@ export default function LocationItem({
             type="text"
             className="grow"
             placeholder="Start typing to search..."
-            value={interim.text}
-            onChange={(e) => onQueryChange(interim.id, e.target.value)}
+            value={displayValue}
+            onChange={handleChange}
           />
         </label>
       </div>

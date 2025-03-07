@@ -13,11 +13,16 @@ import { tollGateLayer } from '@/styles/map.styles';
 import { asset } from '@/util/asset.util';
 import LocationControl from '@/features/LocationControl';
 import Sidebar from '@/components/Sidebar';
-import SearchResults from '@/features/SearchResults';
+import SearchResults from '@/components/SearchResults';
 import { useSearch } from '@/contexts/SearchContext';
+import { useSearchSuggestionsQuery } from './queries/useSearchSuggestionsQuery';
+import { useRetrieveSuggestionQuery } from './queries/useRetrieveSuggestionQuery';
 
 function App() {
-  const { searchQuery } = useSearch();
+  const { searchId, searchQuery, setActiveSuggestion, setInterimLocation, resetSession } =
+    useSearch();
+  const { data: suggestions, isLoading: isSearching } = useSearchSuggestionsQuery();
+  const { data: retrievedLocation, isSuccess: retrieveSuccess } = useRetrieveSuggestionQuery();
 
   const [tollGates, setTollGates] = useState<GeoJSON.FeatureCollection | undefined>(undefined);
 
@@ -33,6 +38,13 @@ function App() {
     }
   }, [tollGates]);
 
+  useEffect(() => {
+    if (searchId && retrievedLocation && retrieveSuccess) {
+      setInterimLocation(searchId, retrievedLocation);
+      resetSession();
+    }
+  }, [searchId, retrievedLocation, retrieveSuccess, resetSession, setInterimLocation]);
+
   return (
     <>
       <div className="relative h-screen w-screen overflow-hidden">
@@ -40,7 +52,14 @@ function App() {
           <LocationControl />
           <div className="divider"></div>
           <div className="flex h-full flex-col justify-between px-4">
-            {searchQuery.length > 0 && <SearchResults />}
+            {searchQuery.length > 0 && (
+              <SearchResults
+                searchQuery={searchQuery}
+                results={suggestions ?? []}
+                isSearching={isSearching}
+                onSelect={setActiveSuggestion}
+              />
+            )}
           </div>
         </Sidebar>
 

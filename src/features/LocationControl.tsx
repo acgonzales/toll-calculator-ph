@@ -26,7 +26,7 @@ export default function LocationControl() {
         ))}
       </ul>
       <button className="btn btn-outline btn-secondary" onClick={addInterim}>
-        Add more destination
+        Add another destination
       </button>
     </div>
   );

@@ -1,18 +1,22 @@
 import { createContext, useCallback, useContext, useState } from 'react';
 import { createSession, SearchBoxSearchSession } from '@/services/location.service';
-import { LocationInterim } from '@/types/common.types';
+import { Location, LocationInterim } from '@/types/common.types';
 import { v4 as uuidv4 } from 'uuid';
+import { SearchBoxSuggestion } from '@mapbox/search-js-core';
 
 interface SearchContextProps {
   session: SearchBoxSearchSession;
   locationInterims: LocationInterim[];
   searchQuery: string;
   searchId?: string;
+  activeSuggestion: SearchBoxSuggestion | undefined;
 
   setSearchQuery: (searchId: string, query: string) => void;
   resetSession: () => void;
   addInterim: () => void;
   removeInterim: (id: string) => void;
+  setInterimLocation: (id: string, location: Location) => void;
+  setActiveSuggestion: (suggestion: SearchBoxSuggestion | undefined) => void;
 }
 
 const SearchContext = createContext<SearchContextProps | undefined>(undefined);
@@ -33,6 +37,9 @@ export const SearchProvider = ({ children }: { children: React.ReactNode }) => {
     useState<LocationInterim[]>(initialLocationInterims);
   const [searchId, setSearchId] = useState<string | undefined>(undefined);
   const [searchQuery, setSearchQueryOriginal] = useState('');
+  const [activeSuggestion, setActiveSuggestion] = useState<SearchBoxSuggestion | undefined>(
+    undefined,
+  );
 
   const setSearchQuery = useCallback(
     (searchId: string, query: string) => {
@@ -50,6 +57,9 @@ export const SearchProvider = ({ children }: { children: React.ReactNode }) => {
 
   const resetSession = () => {
     setSession(createSession());
+    setSearchId(undefined);
+    setSearchQueryOriginal('');
+    setActiveSuggestion(undefined);
   };
 
   const addInterim = () => {
@@ -60,6 +70,16 @@ export const SearchProvider = ({ children }: { children: React.ReactNode }) => {
     setLocationIterims((prev) => prev.filter((i) => i.id !== id));
   };
 
+  const setInterimLocation = (id: string, location: Location) => {
+    setLocationIterims((prev) =>
+      prev.map((i) => {
+        if (i.id === id) {
+          return { ...i, location };
+        }
+        return i;
+      }),
+    );
+  };
   return (
     <SearchContext.Provider
       value={{
@@ -67,10 +87,13 @@ export const SearchProvider = ({ children }: { children: React.ReactNode }) => {
         locationInterims,
         searchId,
         searchQuery,
+        activeSuggestion,
         setSearchQuery,
         resetSession,
         addInterim,
         removeInterim,
+        setInterimLocation,
+        setActiveSuggestion,
       }}
     >
       {children}

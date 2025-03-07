@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useSearch } from '@/contexts/SearchContext';
+import { useSearch } from '@/stores/search/hooks';
 import { getSuggestions } from '@/services/location.service';
 
 export const useSearchSuggestionsQuery = () => {

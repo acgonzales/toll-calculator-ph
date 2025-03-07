@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useSearch } from '@/contexts/SearchContext';
+import { useSearch } from '@/stores/search/hooks';
 import { getLocationFromSuggestion } from '@/services/location.service';
 
 export const useRetrieveSuggestionQuery = () => {

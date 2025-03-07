@@ -11,7 +11,7 @@ export interface TollGate {
 }
 
 export interface Location {
-  id?: string;
+  id: string;
   name: string;
   address: string;
   coordinates: Coordinates;

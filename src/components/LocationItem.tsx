@@ -13,6 +13,7 @@ interface LocationItemProps extends React.ComponentPropsWithoutRef<'li'> {
   interim: LocationInterim;
   isOrigin: boolean;
   canDelete: boolean;
+  color: string;
   onQueryChange: (id: string, text: string) => void;
   onRemoveItem: (id: string) => void;
 }
@@ -22,15 +23,16 @@ export default function LocationItem({
   className,
   interim,
   canDelete,
+  color,
   onQueryChange,
   onRemoveItem,
 }: LocationItemProps) {
-  const { handleChange, displayValue, isRealized } = useLocationSearch({
+  const { handleChange, inputValue, isRealized } = useLocationSearch({
     interim,
     onQueryChange,
   });
 
-  const leadingIconCls = clsx('size-6', isRealized && 'text-success');
+  const leadingIconCls = clsx('size-6', isRealized && color);
 
   return (
     <li className={twMerge(className, 'list-row p-1')}>
@@ -48,7 +50,7 @@ export default function LocationItem({
             type="text"
             className="grow"
             placeholder="Start typing to search..."
-            value={displayValue}
+            value={inputValue}
             onChange={handleChange}
           />
         </label>

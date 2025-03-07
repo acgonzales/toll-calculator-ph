@@ -10,11 +10,12 @@ import Map, {
 import env from '@/config/env';
 import { tollGateLayer } from '@/styles/map.styles';
 import { useTollGatesQuery } from '@/queries/useTollGatesQuery';
-import { useSearch } from '@/stores/search/hooks';
-import LocationMarker from '@/components/location-marker';
+import LocationMarker from '@/components/LocationMarker';
+import { useLocation } from '@/stores';
+import { LocationColors } from '@/config/colors';
 
 export default function MapView() {
-  const { locationInterims } = useSearch();
+  const { locations } = useLocation();
   const { data: tollGates, isLoading } = useTollGatesQuery();
 
   const mapRef = useRef<MapRef>(null);
@@ -26,8 +27,6 @@ export default function MapView() {
       </div>
     );
   }
-
-  const locations = locationInterims.filter((i) => i.location).map((i) => i.location);
 
   return (
     <Map
@@ -45,8 +44,8 @@ export default function MapView() {
         </Source>
       )}
 
-      {locations.map((location) => (
-        <LocationMarker key={location!.id} location={location!} />
+      {locations.map((location, index) => (
+        <LocationMarker key={location!.id} color={LocationColors[index]} location={location!} />
       ))}
     </Map>
   );

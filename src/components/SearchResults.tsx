@@ -14,7 +14,7 @@ export default function SearchResults({
   onSelect,
 }: SearchResultsProps) {
   return (
-    <ul className="list">
+    <ul className="list bg-base-100 rounded-box shadow-md">
       <li className="pb-2 text-xs tracking-wide opacity-60">
         {`Search results for "${searchQuery}"`}
       </li>

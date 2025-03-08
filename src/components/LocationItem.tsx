@@ -9,6 +9,8 @@ import { twMerge } from 'tailwind-merge';
 import clsx from 'clsx';
 import { useLocationSearch } from '@/hooks/useLocationSearch';
 
+// TODO: When input is focused, fly to the location in map
+
 interface LocationItemProps extends React.ComponentPropsWithoutRef<'li'> {
   interim: LocationInterim;
   isOrigin: boolean;

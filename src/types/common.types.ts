@@ -24,44 +24,60 @@ export interface LocationInterim {
   location?: Location;
 }
 
-export interface DirectionStep {
+export interface RouteLegStep {
   id: string;
-  name: string;
-  geometry: GeoJSON.MultiLineString | GeoJSON.LineString;
-}
-export interface Directions {
-  origin: Location;
-  destination: Location;
-  steps: DirectionStep[];
-  geometry: GeoJSON.GeoJSON;
+  summary: string;
+  geometry: GeoJSON.LineString;
 }
 
-export interface DirectionsTollCalculationOverviewLegRegular {
-  type: 'regular';
-  steps: DirectionStep[];
-  geometry: GeoJSON.GeoJSON;
+export interface RouteLeg {
+  id: string;
+  summary: string;
+  duration: number;
+  geometry: GeoJSON.FeatureCollection | GeoJSON.LineString; 
+  steps: RouteLegStep[];
 }
 
-export interface DirectionsTollCalculationOverviewLegToll {
-  type: 'toll';
-  steps: DirectionStep[];
-  geometry: GeoJSON.GeoJSON;
-  entry: TollGate;
-  exit: TollGate;
-  price: number;
+export interface Route {
+  id: string;
+  duration: number;
+  distance: number;
+  geometry: GeoJSON.LineString;
+  legs: RouteLeg[];
 }
 
-export type DirectionsTollCalculationOverviewLeg =
-  | DirectionsTollCalculationOverviewLegRegular
-  | DirectionsTollCalculationOverviewLegToll;
-
-export interface DirectionsTollCalculation {
-  directions: Directions;
-  overview: DirectionsTollCalculationOverviewLeg[];
-  easyTripTotal: number;
-  autoSweepTotal: number;
-  total: number;
+export interface DirectionsResponse {
+  id: string;
+  locations: Location[];
+  routes: Route[];
 }
+
+// export interface DirectionsTollCalculationOverviewLegRegular {
+//   type: 'regular';
+//   steps: DirectionStep[];
+//   geometry: GeoJSON.GeoJSON;
+// }
+
+// export interface DirectionsTollCalculationOverviewLegToll {
+//   type: 'toll';
+//   steps: DirectionStep[];
+//   geometry: GeoJSON.GeoJSON;
+//   entry: TollGate;
+//   exit: TollGate;
+//   price: number;
+// }
+
+// export type DirectionsTollCalculationOverviewLeg =
+//   | DirectionsTollCalculationOverviewLegRegular
+//   | DirectionsTollCalculationOverviewLegToll;
+
+// export interface DirectionsTollCalculation {
+//   directions: Directions;
+//   overview: DirectionsTollCalculationOverviewLeg[];
+//   easyTripTotal: number;
+//   autoSweepTotal: number;
+//   total: number;
+// }
 
 export interface TollPriceMatrixEntry {
   [entry: string]: {

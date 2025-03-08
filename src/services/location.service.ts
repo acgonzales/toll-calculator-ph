@@ -1,5 +1,5 @@
 import env from '@/config/env';
-import { Coordinates, Location, Directions } from '@/types/common.types';
+import { Coordinates, Location, DirectionsResponse } from '@/types/common.types';
 import {
   SearchBoxCore,
   SearchSession,
@@ -9,6 +9,7 @@ import {
   SearchBoxRetrieveResponse,
 } from '@mapbox/search-js-core';
 import mbDirections from '@mapbox/mapbox-sdk/services/directions';
+import { combineLineStrings } from '@/util/geojson.util';
 
 const searchBoxCore = new SearchBoxCore({
   accessToken: env.MAPBOX_API_KEY,
@@ -46,39 +47,51 @@ export const getLocationFromCoordinates = async (
   };
 };
 
-export const getDirections = async (
-  origin: Location,
-  destination: Location,
-): Promise<Directions> => {
+export const getDirections = async (locations: Location[]): Promise<DirectionsResponse> => {
   const request = directionsApi.getDirections({
     profile: 'driving',
-    alternatives: false,
+    alternatives: true,
     steps: true,
-    bannerInstructions: true,
     geometries: 'geojson',
-    waypoints: [
-      {
-        waypointName: origin.name,
-        coordinates: [origin.coordinates.longitude, origin.coordinates.latitude],
-      },
-      {
-        waypointName: destination.name,
-        coordinates: [destination.coordinates.longitude, destination.coordinates.latitude],
-      },
-    ],
+    overview: 'full',
+    waypoints: locations.map((location) => ({
+      waypointName: location.name,
+      coordinates: [location.coordinates.longitude, location.coordinates.latitude],
+    })),
   });
   const response = (await request.send()).body;
-  const route = response.routes[0];
-  const leg = route.legs[0];
+  const responseId = response.uuid;
   return {
-    origin,
-    destination,
-    geometry: route.geometry,
-    steps: leg.steps.map((step, index) => ({
-      id: index.toString(),
-      name: step.name,
-      geometry: step.geometry,
-    })),
+    id: responseId,
+    locations,
+    routes: response.routes.map((route, index) => {
+      const routeId = responseId + '-' + index;
+      return {
+        id: routeId,
+        duration: route.duration,
+        distance: route.distance,
+        geometry: route.geometry as GeoJSON.LineString,
+        legs: route.legs.map((leg, lIndex) => {
+          const legId = routeId + '-' + lIndex;
+          return {
+            id: legId,
+            summary: leg.summary,
+            duration: leg.duration,
+            geometry: combineLineStrings(
+              leg.steps.map((step) => step.geometry as GeoJSON.LineString),
+            ),
+            steps: leg.steps.map((step, sIndex) => {
+              const stepId = legId + '-' + sIndex;
+              return {
+                id: stepId,
+                summary: step.maneuver.instruction,
+                geometry: step.geometry as GeoJSON.LineString,
+              };
+            }),
+          };
+        }),
+      };
+    }),
   };
 };
 

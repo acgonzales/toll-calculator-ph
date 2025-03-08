@@ -3,7 +3,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { LocationState } from '@/stores/location/types';
 import { LocationAction, LocationActionTypes } from '@/stores/location/actions';
 
-const initialLocationInterims: LocationInterim[] = [{ id: uuidv4() }, { id: uuidv4() }];
+const originId = uuidv4();
+
+const initialLocationInterims: LocationInterim[] = [{ id: originId }, { id: uuidv4() }];
 
 export const initialState: LocationState = {
   interims: initialLocationInterims,

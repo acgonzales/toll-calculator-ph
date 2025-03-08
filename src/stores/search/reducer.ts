@@ -22,7 +22,7 @@ export function searchReducer(state: SearchState, action: SearchAction): SearchS
     case SearchActionTypes.RESET_SESSION:
       return {
         ...state,
-        session: createSession(),
+        // session: createSession(),
         searchId: undefined,
         searchQuery: '',
         activeSuggestion: undefined,

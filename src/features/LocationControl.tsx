@@ -29,7 +29,7 @@ export default function LocationControl() {
         ))}
       </ul>
       {interims.length < 5 && (
-        <button className="btn btn-outline btn-secondary" onClick={addInterim}>
+        <button className="btn btn-outline btn-primary" onClick={addInterim}>
           Add another destination
         </button>
       )}

@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import Map, {
   FullscreenControl,
   GeolocateControl,
@@ -8,17 +8,39 @@ import Map, {
   Source,
 } from 'react-map-gl/mapbox';
 import env from '@/config/env';
-import { tollGateLayer } from '@/styles/map.styles';
+import { directionStepLayer, tollGateLayer } from '@/styles/map.styles';
 import { useTollGatesQuery } from '@/queries/useTollGatesQuery';
 import LocationMarker from '@/components/LocationMarker';
-import { useLocation } from '@/stores';
+import { useDirections, useLocation } from '@/stores';
 import { LocationColors } from '@/config/colors';
+import { getCenter, getMapBounds } from '@/util/map.util';
 
 export default function MapView() {
-  const { locations } = useLocation();
+  const { locations, isValid } = useLocation();
+  const { activeRoute } = useDirections();
+
   const { data: tollGates, isLoading } = useTollGatesQuery();
 
   const mapRef = useRef<MapRef>(null);
+
+  useEffect(() => {
+    if (isValid) {
+      const coordinates = locations.map((l) => l.coordinates);
+      // TODO: Make offsets responsive
+      const center = getCenter(coordinates);
+      mapRef.current?.jumpTo({
+        center: {
+          lat: center.latitude,
+          lon: center.longitude - 0.2,
+        },
+      });
+      mapRef.current?.fitBounds(getMapBounds(coordinates), {
+        linear: false,
+        padding: { left: 400, right: 80, top: 80, bottom: 80 },
+        maxZoom: 15,
+      });
+    }
+  }, [isValid, locations]);
 
   if (isLoading) {
     return (
@@ -47,6 +69,12 @@ export default function MapView() {
       {locations.map((location, index) => (
         <LocationMarker key={location!.id} color={LocationColors[index]} location={location!} />
       ))}
+
+      {activeRoute && (
+        <Source type="geojson" data={activeRoute.geometry}>
+          <Layer {...directionStepLayer} />
+        </Source>
+      )}
     </Map>
   );
 }

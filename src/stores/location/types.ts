@@ -6,6 +6,7 @@ export interface LocationState {
 
 export interface LocationContextState extends LocationState {
   locations: Location[];
+  isValid: boolean;
   addInterim: () => void;
   removeInterim: (id: string) => void;
   setInterimLocation: (id: string, location: Location) => void;

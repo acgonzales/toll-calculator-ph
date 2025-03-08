@@ -12,9 +12,12 @@ export const LocationProvider = ({ children }: { children: React.ReactNode }) =>
     .filter((interim) => interim.location)
     .map((interim) => interim.location!);
 
+  const isValid = locations.length === state.interims.length;
+
   const contextValue = {
     ...state,
     locations,
+    isValid,
     addInterim: () => dispatch(locationActions.addInterim()),
     removeInterim: (id: string) => dispatch(locationActions.removeInterim(id)),
     setInterimLocation: (id: string, location: Location) =>

@@ -18,11 +18,7 @@ function App() {
 
   const { data: suggestions, isLoading: isSearching } = useSearchSuggestionsQuery();
   const { data: retrievedLocation, isSuccess: retrieveSuccess } = useRetrieveSuggestionQuery();
-  const {
-    data: directions,
-    isPending: isRetrievingDirections,
-    isSuccess: retrieveDirectionsSuccess,
-  } = useDirectionsQuery();
+  const { data: directions, isPending: isRetrievingDirections } = useDirectionsQuery();
 
   useEffect(() => {
     if (searchId && retrievedLocation && retrieveSuccess) {
@@ -32,16 +28,12 @@ function App() {
   }, [searchId, retrievedLocation, retrieveSuccess, resetSession, setInterimLocation]);
 
   useEffect(() => {
-    if (retrieveDirectionsSuccess && directions!.routes.length > 0 && !activeRoute) {
-      setActiveRoute(directions!.routes[0]);
-    }
-  }, [retrieveDirectionsSuccess, directions, activeRoute, setActiveRoute]);
-
-  useEffect(() => {
     if (!isValid) {
       clearActiveRoute();
+    } else if (isValid && directions && directions.routes.length > 0) {
+      setActiveRoute(directions!.routes[0]);
     }
-  }, [isValid, clearActiveRoute]);
+  }, [directions, isValid, setActiveRoute, clearActiveRoute]);
 
   const onRouteSelect = (route: Route) => {
     setActiveRoute(route);

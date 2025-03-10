@@ -1,5 +1,10 @@
 import env from '@/config/env';
-import { Coordinates, Location, DirectionsResponse } from '@/types/common.types';
+import {
+  Coordinates,
+  Location,
+  DirectionsResponse,
+  TollGateGeoJsonType,
+} from '@/types/common.types';
 import {
   SearchBoxCore,
   SearchSession,
@@ -10,6 +15,7 @@ import {
 } from '@mapbox/search-js-core';
 import mbDirections from '@mapbox/mapbox-sdk/services/directions';
 import { combineLineStrings } from '@/util/geojson.util';
+import { getRouteTollPrices } from '@/services/toll.service';
 
 const searchBoxCore = new SearchBoxCore({
   accessToken: env.MAPBOX_API_KEY,
@@ -47,7 +53,10 @@ export const getLocationFromCoordinates = async (
   };
 };
 
-export const getDirections = async (locations: Location[]): Promise<DirectionsResponse> => {
+export const getDirections = async (
+  tollGates: TollGateGeoJsonType,
+  locations: Location[],
+): Promise<DirectionsResponse> => {
   const request = directionsApi.getDirections({
     profile: 'driving',
     alternatives: true,
@@ -66,30 +75,37 @@ export const getDirections = async (locations: Location[]): Promise<DirectionsRe
     locations,
     routes: response.routes.map((route, index) => {
       const routeId = responseId + '-' + index;
+
+      const legs = route.legs.map((leg, lIndex) => {
+        const legId = routeId + '-' + lIndex;
+        return {
+          id: legId,
+          summary: leg.summary,
+          duration: leg.duration,
+          geometry: combineLineStrings(
+            leg.steps.map((step) => step.geometry as GeoJSON.LineString),
+          ),
+          steps: leg.steps.map((step, sIndex) => {
+            const stepId = legId + '-' + sIndex;
+            return {
+              id: stepId,
+              summary: step.maneuver.instruction,
+              geometry: step.geometry as GeoJSON.LineString,
+            };
+          }),
+        };
+      });
+
+      const steps = legs.flatMap((leg) => leg.steps);
+      const tollPrices = getRouteTollPrices(tollGates, steps);
+
       return {
         id: routeId,
         duration: route.duration,
         distance: route.distance,
         geometry: route.geometry as GeoJSON.LineString,
-        legs: route.legs.map((leg, lIndex) => {
-          const legId = routeId + '-' + lIndex;
-          return {
-            id: legId,
-            summary: leg.summary,
-            duration: leg.duration,
-            geometry: combineLineStrings(
-              leg.steps.map((step) => step.geometry as GeoJSON.LineString),
-            ),
-            steps: leg.steps.map((step, sIndex) => {
-              const stepId = legId + '-' + sIndex;
-              return {
-                id: stepId,
-                summary: step.maneuver.instruction,
-                geometry: step.geometry as GeoJSON.LineString,
-              };
-            }),
-          };
-        }),
+        tollPrices,
+        legs,
       };
     }),
   };

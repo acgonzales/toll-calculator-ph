@@ -1,13 +1,30 @@
-export interface Coordinates {
-  latitude: number;
-  longitude: number;
-}
-
 export interface TollGate {
   name: string;
   type: 'entry' | 'exit';
   bound: 'Northbound' | 'Southbound';
   expressway: 'NLEX' | 'Skyway';
+}
+
+export type TollGateGeoJsonType = GeoJSON.FeatureCollection<GeoJSON.Polygon, TollGate>;
+
+export interface TollPriceMatrixEntry {
+  [entry: string]: {
+    [exit: string]: [number, number, number]; // [class1, class2, class3]
+  };
+}
+
+export interface TollPriceMatrix {
+  rfidType: 'EasyTrip' | 'AutoSweep';
+  matrix: TollPriceMatrixEntry;
+}
+
+export interface ExpressWayRfidMatrix {
+  [expressway: string]: TollPriceMatrix;
+}
+
+export interface Coordinates {
+  latitude: number;
+  longitude: number;
 }
 
 export interface Location {
@@ -34,8 +51,14 @@ export interface RouteLeg {
   id: string;
   summary: string;
   duration: number;
-  geometry: GeoJSON.FeatureCollection | GeoJSON.LineString; 
+  geometry: GeoJSON.FeatureCollection | GeoJSON.LineString;
   steps: RouteLegStep[];
+}
+
+export interface RouteTollPrice {
+  entry: TollGate;
+  exit: TollGate;
+  price: [number, number, number]; // [class1, class2, class3]
 }
 
 export interface Route {
@@ -44,52 +67,11 @@ export interface Route {
   distance: number;
   geometry: GeoJSON.LineString;
   legs: RouteLeg[];
+  tollPrices: RouteTollPrice[];
 }
 
 export interface DirectionsResponse {
   id: string;
   locations: Location[];
   routes: Route[];
-}
-
-// export interface DirectionsTollCalculationOverviewLegRegular {
-//   type: 'regular';
-//   steps: DirectionStep[];
-//   geometry: GeoJSON.GeoJSON;
-// }
-
-// export interface DirectionsTollCalculationOverviewLegToll {
-//   type: 'toll';
-//   steps: DirectionStep[];
-//   geometry: GeoJSON.GeoJSON;
-//   entry: TollGate;
-//   exit: TollGate;
-//   price: number;
-// }
-
-// export type DirectionsTollCalculationOverviewLeg =
-//   | DirectionsTollCalculationOverviewLegRegular
-//   | DirectionsTollCalculationOverviewLegToll;
-
-// export interface DirectionsTollCalculation {
-//   directions: Directions;
-//   overview: DirectionsTollCalculationOverviewLeg[];
-//   easyTripTotal: number;
-//   autoSweepTotal: number;
-//   total: number;
-// }
-
-export interface TollPriceMatrixEntry {
-  [entry: string]: {
-    [exit: string]: [number, number, number]; // [class1, class2, class3]
-  };
-}
-
-export interface TollPriceMatrix {
-  rfidType: 'EasyTrip' | 'AutoSweep';
-  matrix: TollPriceMatrixEntry;
-}
-
-export interface ExpressWayRfidMatrix {
-  [expressway: string]: TollPriceMatrix;
 }

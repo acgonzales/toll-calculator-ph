@@ -7,7 +7,7 @@ export const directionStepLayer: LayerProps = {
   },
   paint: {
     'line-color': '#0000ff',
-    'line-width': 6,
+    'line-width': 3,
   },
 };
 

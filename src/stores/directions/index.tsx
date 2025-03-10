@@ -1,4 +1,4 @@
-import { createContext, useReducer } from 'react';
+import { createContext, useCallback, useReducer } from 'react';
 import { DirectionsContextState } from '@/stores/directions/types';
 import { directionsReducer, initialState } from '@/stores/directions/reducer';
 import { directionsActions } from '@/stores/directions/actions';
@@ -8,10 +8,18 @@ export const DirectionsContext = createContext<DirectionsContextState | undefine
 export const DirectionsProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(directionsReducer, initialState);
 
+  const clearActiveRoute = useCallback(() => {
+    dispatch(directionsActions.clearActiveRoute());
+  }, []);
+
+  const setActiveRoute = useCallback((route: Route) => {
+    dispatch(directionsActions.setActiveRoute(route));
+  }, []);
+
   const contextValue = {
     ...state,
-    setActiveRoute: (route: Route) => dispatch(directionsActions.setActiveRoute(route)),
-    clearActiveRoute: () => dispatch(directionsActions.clearActiveRoute()),
+    clearActiveRoute,
+    setActiveRoute,
   };
 
   return <DirectionsContext.Provider value={contextValue}>{children}</DirectionsContext.Provider>;

@@ -34,14 +34,14 @@ export default function RouteItem({ index, route, isActive, onSelect }: RouteIte
       {route.tollPrices.length > 0 && (
         <ul className="list-col-wrap list">
           {route.tollPrices.map((tollPrice, index) => (
-            <li className="list-row p-2" key={index}>
+            <li className="flex flex-col gap-3 p-2 xl:flex-row" key={index}>
               <div>
                 <img
                   className="rounded-box h-[32px] w-[72px]"
                   src={tollPrice.entry.expressway == 'NLEX' ? easyTripLogo : autosweepLogo}
                 />
               </div>
-              <div className="text-xs uppercase">
+              <div className="flex-grow text-xs uppercase">
                 <div>{tollPrice.entry.name}</div>
                 <div>{tollPrice.exit.name}</div>
               </div>

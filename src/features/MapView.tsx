@@ -7,9 +7,10 @@ import Map, {
   NavigationControl,
   Source,
 } from 'react-map-gl/mapbox';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import env from '@/config/env';
 import { directionStepLayer, tollGateLayer } from '@/styles/map.styles';
-import { useTollGatesQuery } from '@/queries/useTollGatesQuery';
+import { useTollGatesQuery } from '@/queries';
 import LocationMarker from '@/components/LocationMarker';
 import { useDirections, useLocation } from '@/stores';
 import { LocationColors } from '@/config/colors';

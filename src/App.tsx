@@ -1,68 +1,90 @@
-import { useEffect } from 'react';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import LocationControl from '@/features/LocationControl';
 import Sidebar from '@/components/Sidebar';
-import SearchResults from '@/components/SearchResults';
-import { useSearch, useLocation, useDirections } from '@/stores';
-import { useSearchSuggestionsQuery } from '@/queries/useSearchSuggestionsQuery';
-import { useRetrieveSuggestionQuery } from '@/queries/useRetrieveSuggestionQuery';
 import MapView from '@/features/MapView';
-import { useDirectionsQuery } from './queries/useDirectionsQuery';
-import DirectionsSelection from './components/DirectionsSelection';
-import { Route } from '@/types/common.types';
+import {
+  BuildingOffice2Icon,
+  MapIcon,
+  QuestionMarkCircleIcon,
+  TableCellsIcon,
+} from '@heroicons/react/24/solid';
+import MainPage from '@/pages/MainPage';
+import TollMatrixPage from '@/pages/TollMatrixPage';
+import FaqPage from '@/pages/FaqPage';
+import { useState } from 'react';
+import clsx from 'clsx';
+import TollGatesPage from './pages/TollGatesPage';
+
+// TODO: Improve navigation system
 
 function App() {
-  const { isValid, setInterimLocation } = useLocation();
-  const { searchId, searchQuery, setActiveSuggestion, resetSession } = useSearch();
-  const { activeRoute, setActiveRoute, clearActiveRoute } = useDirections();
+  const [pageIndex, setPageIndex] = useState(0);
 
-  const { data: suggestions, isLoading: isSearching } = useSearchSuggestionsQuery();
-  const { data: retrievedLocation, isSuccess: retrieveSuccess } = useRetrieveSuggestionQuery();
-  const { data: directions, isPending: isRetrievingDirections } = useDirectionsQuery();
-
-  useEffect(() => {
-    if (searchId && retrievedLocation && retrieveSuccess) {
-      setInterimLocation(searchId, retrievedLocation);
-      resetSession();
+  const renderPage = () => {
+    switch (pageIndex) {
+      case 0:
+        return <MainPage />;
+      case 1:
+        return <TollMatrixPage />;
+      case 2:
+        return <TollGatesPage />;
+      case 3:
+        return <FaqPage />;
+      default:
+        return <MainPage />;
     }
-  }, [searchId, retrievedLocation, retrieveSuccess, resetSession, setInterimLocation]);
-
-  useEffect(() => {
-    if (!isValid) {
-      clearActiveRoute();
-    } else if (isValid && directions && directions.routes.length > 0) {
-      setActiveRoute(directions!.routes[0]);
-    }
-  }, [directions, isValid, setActiveRoute, clearActiveRoute]);
-
-  const onRouteSelect = (route: Route) => {
-    setActiveRoute(route);
   };
+
+  const sidebarWidth = pageIndex === 1 ? 'xl:w-1/2' : 'xl:w-1/3';
 
   return (
     <>
       <div className="relative h-screen w-screen overflow-hidden">
-        <Sidebar className="absolute bottom-0 z-10 h-1/3 w-full lg:left-0 lg:h-full lg:w-1/3">
-          <LocationControl />
-          <div className="divider"></div>
-          <div className="flex h-full flex-col justify-between px-4">
-            {searchQuery.length > 0 && (
-              <SearchResults
-                searchQuery={searchQuery}
-                results={suggestions ?? []}
-                isSearching={isSearching}
-                onSelect={setActiveSuggestion}
-              />
-            )}
-
-            {searchQuery.length < 1 && isValid && !isRetrievingDirections && (
-              <DirectionsSelection
-                activeRoute={activeRoute}
-                routes={directions!.routes}
-                onSelect={onRouteSelect}
-              />
-            )}
+        <Sidebar
+          className={clsx(
+            'scrollbar-hide absolute bottom-0 z-10 h-1/2 w-full gap-1 overflow-auto transition-all xl:left-0 xl:h-full',
+            sidebarWidth,
+          )}
+        >
+          <div className="mt-2 flex w-full justify-center">
+            <ul className="menu menu-horizontal bg-base-200 rounded-box">
+              <li>
+                <a
+                  className={`tooltip tooltip-bottom`}
+                  data-tip="Home"
+                  onClick={() => setPageIndex(0)}
+                >
+                  <MapIcon className="size-6" />
+                </a>
+              </li>
+              <li>
+                <a
+                  className={`tooltip tooltip-bottom`}
+                  data-tip="Toll Matrix"
+                  onClick={() => setPageIndex(1)}
+                >
+                  <TableCellsIcon className="size-6" />
+                </a>
+              </li>
+              <li>
+                <a
+                  className={`tooltip tooltip-bottom`}
+                  data-tip="Toll Gates"
+                  onClick={() => setPageIndex(2)}
+                >
+                  <BuildingOffice2Icon className="size-6" />
+                </a>
+              </li>
+              <li>
+                <a
+                  className={`tooltip tooltip-bottom`}
+                  data-tip="FAQ"
+                  onClick={() => setPageIndex(3)}
+                >
+                  <QuestionMarkCircleIcon className="size-6" />
+                </a>
+              </li>
+            </ul>
           </div>
+          {renderPage()}
         </Sidebar>
 
         <div className="h-full w-full">

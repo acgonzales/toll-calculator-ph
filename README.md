@@ -1,14 +1,12 @@
-# 🇵🇭 Toll Calculator
+# 🇵🇭 Unified Toll Calculator
 
-This is a simple web application that calculates toll prices for Philippine toll roads.
+A web application that calculates toll fees for Philippine expressways, helping travelers plan their journey costs effectively.
 
-Website: https://acgonzales.github.io/toll-calculator-ph/
+## 🌐 Live Demo
+[https://acgonzales.github.io/toll-calculator-ph/](https://acgonzales.github.io/toll-calculator-ph/)
 
-## TODO
+## 📝 TODO
 
 - [ ] Add more toll gates (NLEX, SCTEX, Skyway, etc.)
 - [ ] Error handling
 - [ ] Tests
-- [ ] Multi-route directions
-- [ ] Rate limiting
-- [ ] UI Improvements (layout, loading states, etc.)

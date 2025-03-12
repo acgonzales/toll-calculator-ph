@@ -60,3 +60,33 @@ export const getRouteTollPrices = (
 
   return result;
 };
+
+export const groupTollGatesByExpressway = (
+  tollGatesGeoJson: TollGateGeoJsonType,
+): Record<string, Record<string, GeoJSON.Feature<GeoJSON.Polygon, TollGate>[]>> => {
+  const grouped = tollGatesGeoJson.features.reduce(
+    (groups, feature) => {
+      const expressway = feature.properties.expressway;
+      const bound = feature.properties.bound;
+
+      if (!groups[expressway]) {
+        groups[expressway] = {};
+      }
+      if (!groups[expressway][bound]) {
+        groups[expressway][bound] = [];
+      }
+
+      groups[expressway][bound].push(feature);
+      return groups;
+    },
+    {} as Record<string, Record<string, GeoJSON.Feature<GeoJSON.Polygon, TollGate>[]>>,
+  );
+
+  Object.keys(grouped).forEach((expressway) => {
+    Object.keys(grouped[expressway]).forEach((bound) => {
+      grouped[expressway][bound].sort((a, b) => a.properties.name.localeCompare(b.properties.name));
+    });
+  });
+
+  return grouped;
+};

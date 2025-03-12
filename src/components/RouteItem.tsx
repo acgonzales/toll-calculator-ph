@@ -1,7 +1,7 @@
 import { Route } from '@/types/common.types';
 import { formatDistance, formatDuration, formatPrice } from '@/util/format.util';
 import clsx from 'clsx';
-import easyTripLogo from '@/assets/easytrip-Logo.webp';
+import easyTripLogo from '@/assets/easytrip-logo.webp';
 import autosweepLogo from '@/assets/autosweep-logo.png';
 
 interface RouteItemProps {

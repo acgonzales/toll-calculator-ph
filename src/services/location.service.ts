@@ -1,5 +1,10 @@
 import env from '@/config/env';
-import { Coordinates, Location, Directions } from '@/types/common.types';
+import {
+  Coordinates,
+  Location,
+  DirectionsResponse,
+  TollGateGeoJsonType,
+} from '@/types/common.types';
 import {
   SearchBoxCore,
   SearchSession,
@@ -9,6 +14,8 @@ import {
   SearchBoxRetrieveResponse,
 } from '@mapbox/search-js-core';
 import mbDirections from '@mapbox/mapbox-sdk/services/directions';
+import { combineLineStrings } from '@/util/geojson.util';
+import { getRouteTollPrices } from '@/services/toll.service';
 
 const searchBoxCore = new SearchBoxCore({
   accessToken: env.MAPBOX_API_KEY,
@@ -47,42 +54,64 @@ export const getLocationFromCoordinates = async (
 };
 
 export const getDirections = async (
-  origin: Location,
-  destination: Location,
-): Promise<Directions> => {
+  tollGates: TollGateGeoJsonType,
+  locations: Location[],
+): Promise<DirectionsResponse> => {
   const request = directionsApi.getDirections({
     profile: 'driving',
-    alternatives: false,
+    alternatives: true,
     steps: true,
-    bannerInstructions: true,
     geometries: 'geojson',
-    waypoints: [
-      {
-        waypointName: origin.name,
-        coordinates: [origin.coordinates.longitude, origin.coordinates.latitude],
-      },
-      {
-        waypointName: destination.name,
-        coordinates: [destination.coordinates.longitude, destination.coordinates.latitude],
-      },
-    ],
+    overview: 'full',
+    waypoints: locations.map((location) => ({
+      waypointName: location.name,
+      coordinates: [location.coordinates.longitude, location.coordinates.latitude],
+    })),
   });
   const response = (await request.send()).body;
-  const route = response.routes[0];
-  const leg = route.legs[0];
+  const responseId = response.uuid;
   return {
-    origin,
-    destination,
-    geometry: route.geometry,
-    steps: leg.steps.map((step, index) => ({
-      id: index.toString(),
-      name: step.name,
-      geometry: step.geometry,
-    })),
+    id: responseId,
+    locations,
+    routes: response.routes.map((route, index) => {
+      const routeId = responseId + '-' + index;
+
+      const legs = route.legs.map((leg, lIndex) => {
+        const legId = routeId + '-' + lIndex;
+        return {
+          id: legId,
+          summary: leg.summary,
+          duration: leg.duration,
+          geometry: combineLineStrings(
+            leg.steps.map((step) => step.geometry as GeoJSON.LineString),
+          ),
+          steps: leg.steps.map((step, sIndex) => {
+            const stepId = legId + '-' + sIndex;
+            return {
+              id: stepId,
+              summary: step.maneuver.instruction,
+              geometry: step.geometry as GeoJSON.LineString,
+            };
+          }),
+        };
+      });
+
+      const steps = legs.flatMap((leg) => leg.steps);
+      const tollPrices = getRouteTollPrices(tollGates, steps);
+
+      return {
+        id: routeId,
+        duration: route.duration,
+        distance: route.distance,
+        geometry: route.geometry as GeoJSON.LineString,
+        tollPrices,
+        legs,
+      };
+    }),
   };
 };
 
-type SearchBoxSearchSession = SearchSession<
+export type SearchBoxSearchSession = SearchSession<
   SearchBoxOptions,
   SearchBoxSuggestion,
   SearchBoxSuggestionResponse,
@@ -90,7 +119,7 @@ type SearchBoxSearchSession = SearchSession<
 >;
 
 export const createSession = (): SearchBoxSearchSession => {
-  return new SearchSession(searchBoxCore, 1000);
+  return new SearchSession(searchBoxCore);
 };
 
 export const getSuggestions = async (
@@ -98,7 +127,7 @@ export const getSuggestions = async (
   query: string,
 ): Promise<SearchBoxSuggestion[]> => {
   const response = await searchSession.suggest(query, {
-    limit: 3,
+    limit: 5,
     country: 'ph',
   });
   return response.suggestions;

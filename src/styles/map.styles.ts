@@ -2,9 +2,12 @@ import { LayerProps } from 'react-map-gl/mapbox';
 
 export const directionStepLayer: LayerProps = {
   type: 'line',
+  layout: {
+    'line-cap': 'round',
+  },
   paint: {
-    'line-color': '#ff0000',
-    'line-width': 5,
+    'line-color': '#0000ff',
+    'line-width': 3,
   },
 };
 

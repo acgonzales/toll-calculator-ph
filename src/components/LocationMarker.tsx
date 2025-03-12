@@ -4,7 +4,12 @@ import { Location } from '@/types/common.types';
 import { useEffect, useMemo, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 
-export default function LocationMarker({ location }: { location: Location }) {
+interface LocationMarkerProps {
+  location: Location;
+  color: string;
+}
+
+export default function LocationMarker({ location, color }: LocationMarkerProps) {
   const markerRef = useRef<MarkerInstance>(null);
 
   useEffect(() => {
@@ -31,7 +36,9 @@ export default function LocationMarker({ location }: { location: Location }) {
       longitude={location.coordinates.longitude}
       popup={popup}
     >
-      <MapPinIcon className="size-10 cursor-pointer text-red-500 hover:text-red-700" />
+      <MapPinIcon
+        className={`size-10 cursor-pointer ${color} transition-all hover:brightness-85`}
+      />
     </Marker>
   );
 }

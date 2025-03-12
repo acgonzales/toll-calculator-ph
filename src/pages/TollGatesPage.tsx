@@ -28,6 +28,9 @@ export default function TollGatesPage() {
 
   return (
     <div className="flex flex-col gap-4 p-4">
+      <div role="alert" className="alert alert-info alert-soft">
+        <span>Partially NLEX as of now, other entries/exits will be added soon.</span>
+      </div>
       {Object.entries(tollGatesGroupedByExpressway).map(([expressway, boundGroups]) => (
         <div key={expressway} className="rounded-box border-base-content/5 bg-base-100 border p-4">
           <h2 className="mb-4 text-lg font-bold">{expressway}</h2>
@@ -37,7 +40,7 @@ export default function TollGatesPage() {
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {gates.map((gate) => (
                   <div
-                    key={gate.properties.name}
+                    key={`${expressway}-${bound}-${gate.properties.name}-${gate.properties.type}`}
                     // onClick={() => onTollGateClicked(gate)}
                     className="rounded-box bg-base-200 hover:bg-base-300 cursor-pointer p-3"
                   >
